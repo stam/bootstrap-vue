@@ -1,7 +1,7 @@
 // SSR safe client-side ID attribute generation
 // ID's can only be generated client-side, after mount
 // `this._uid` is not synched between server and client
-import { COMPONENT_UID_KEY, Vue } from '../vue'
+import { Vue } from '../vue'
 import { PROP_TYPE_STRING } from '../constants/props'
 import { makeProp } from '../utils/props'
 
@@ -9,6 +9,12 @@ import { makeProp } from '../utils/props'
 
 export const props = {
   id: makeProp(PROP_TYPE_STRING)
+}
+
+function uuidv4() {
+  return ([1e7]+-1e3+-4e3+-8e3+-1e11).replace(/[018]/g, c =>
+    (c ^ crypto.getRandomValues(new Uint8Array(1))[0] & 15 >> c / 4).toString(16)
+  );
 }
 
 // --- Mixin ---
@@ -45,7 +51,7 @@ export const idMixin = Vue.extend({
     this.$nextTick(() => {
       // Update DOM with auto-generated ID after mount
       // to prevent SSR hydration errors
-      this.localId_ = `__BVID__${this[COMPONENT_UID_KEY]}`
+      this.localId_ = `__BVID__${uuidv4()}`
     })
   }
 })
